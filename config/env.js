@@ -3,7 +3,6 @@
 const fs = require("fs")
 const path = require("path")
 
-// Make sure that including paths.js after env.js will read .env variables.
 delete require.cache[require.resolve("./paths")]
 
 const NODE_ENV = process.env.NODE_ENV
@@ -20,8 +19,6 @@ process.env.NODE_PATH = (process.env.NODE_PATH || "")
     .map((folder) => path.resolve(appDirectory, folder))
     .join(path.delimiter)
 
-// Grab NODE_ENV and REACT_APP_* environment variables and prepare them to be
-// injected into the application via DefinePlugin in webpack configuration.
 const REACT_APP = /^REACT_APP_/i
 
 function getClientEnvironment(publicUrl) {
@@ -34,10 +31,6 @@ function getClientEnvironment(publicUrl) {
             },
             {
                 NODE_ENV: process.env.NODE_ENV || "development",
-                // Useful for resolving the correct path to static assets in `public`.
-                // For example, <img src={process.env.PUBLIC_URL + '/img/logo.png'} />.
-                // This should only be used as an escape hatch. Normally you would put
-                // images into the `src` and `import` them in code to get their paths.
                 PUBLIC_URL: publicUrl,
                 WDS_SOCKET_HOST: process.env.WDS_SOCKET_HOST,
                 WDS_SOCKET_PATH: process.env.WDS_SOCKET_PATH,
