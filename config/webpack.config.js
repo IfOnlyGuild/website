@@ -10,16 +10,12 @@ const TerserPlugin = require("terser-webpack-plugin")
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin")
 const safePostCssParser = require("postcss-safe-parser")
-const ManifestPlugin = require("webpack-manifest-plugin")
-const InterpolateHtmlPlugin = require("react-dev-utils/InterpolateHtmlPlugin")
 const WatchMissingNodeModulesPlugin = require("react-dev-utils/WatchMissingNodeModulesPlugin")
 const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin")
 const paths = require("./paths")
 const modules = require("./modules")
 const getClientEnvironment = require("./env")
 const ModuleNotFoundPlugin = require("react-dev-utils/ModuleNotFoundPlugin")
-
-const postcssNormalize = require("postcss-normalize")
 
 const appPackageJson = require(paths.appPackageJson)
 
@@ -29,19 +25,11 @@ const imageInlineSizeLimit = parseInt(
     process.env.IMAGE_INLINE_SIZE_LIMIT || "10000"
 )
 
-// style files regexes
 const cssRegex = /\.css$/
 
-// This is the production and development configuration.
-// It is focused on developer experience, fast rebuilds, and a minimal bundle.
 module.exports = function (webpackEnv) {
     const isEnvDevelopment = webpackEnv === "development"
     const isEnvProduction = webpackEnv === "production"
-
-    // Variable used for enabling profiling in Production
-    // passed into alias object. Uses a flag if passed into the build command
-    const isEnvProductionProfile =
-        isEnvProduction && process.argv.includes("--profile")
 
     const env = getClientEnvironment(paths.publicUrlOrPath.slice(0, -1))
 
@@ -57,23 +45,6 @@ module.exports = function (webpackEnv) {
             {
                 loader: require.resolve("css-loader"),
                 options: cssOptions,
-            },
-            {
-                loader: require.resolve("postcss-loader"),
-                options: {
-                    ident: "postcss",
-                    plugins: () => [
-                        require("postcss-flexbugs-fixes"),
-                        require("postcss-preset-env")({
-                            autoprefixer: {
-                                flexbox: "no-2009",
-                            },
-                            stage: 3,
-                        }),
-                        postcssNormalize(),
-                    ],
-                    sourceMap: isEnvProduction && shouldUseSourceMap,
-                },
             },
         ]
         return loaders.filter(Boolean)
@@ -104,12 +75,10 @@ module.exports = function (webpackEnv) {
                 : isEnvDevelopment && "static/js/bundle.js",
             // TODO: remove this when upgrading to webpack 5
             futureEmitAssets: true,
-            // There are also additional JS chunk files if you use code splitting.
             chunkFilename: isEnvProduction
                 ? "static/js/[name].[contenthash:8].chunk.js"
                 : isEnvDevelopment && "static/js/[name].chunk.js",
             publicPath: paths.publicUrlOrPath,
-            // Point sourcemap entries to original disk location (format as URL on Windows)
             devtoolModuleFilenameTemplate: isEnvProduction
                 ? (info) =>
                       path
@@ -141,8 +110,8 @@ module.exports = function (webpackEnv) {
                             safari10: true,
                         },
                         // Added for profiling in devtools
-                        keep_classnames: isEnvProductionProfile,
-                        keep_fnames: isEnvProductionProfile,
+                        keep_classnames: false,
+                        keep_fnames: false,
                         output: {
                             ecma: 5,
                             comments: false,
@@ -173,9 +142,6 @@ module.exports = function (webpackEnv) {
                 chunks: "all",
                 name: false,
             },
-            // Keep the runtime chunk separated to enable long term caching
-            // https://twitter.com/wSokra/status/969679223278505985
-            // https://github.com/facebook/create-react-app/issues/5358
             runtimeChunk: {
                 name: (entrypoint) => `runtime-${entrypoint.name}`,
             },
@@ -185,13 +151,7 @@ module.exports = function (webpackEnv) {
                 modules.additionalModulePaths || []
             ),
             extensions: paths.moduleFileExtensions.map((ext) => `.${ext}`),
-            alias: {
-                ...(isEnvProductionProfile && {
-                    "react-dom$": "react-dom/profiling",
-                    "scheduler/tracing": "scheduler/tracing-profiling",
-                }),
-                ...(modules.webpackAliases || {}),
-            },
+            alias: modules.webpackAliases || {},
             plugins: [
                 PnpWebpackPlugin,
                 new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson]),
@@ -204,9 +164,6 @@ module.exports = function (webpackEnv) {
             strictExportPresence: true,
             rules: [
                 { parser: { requireEnsure: false } },
-
-                // First, run the linter.
-                // It's important to do this before Babel processes the JS.
                 {
                     test: /\.(js|jsx)$/,
                     enforce: "pre",
@@ -243,6 +200,9 @@ module.exports = function (webpackEnv) {
                                 customize: require.resolve(
                                     "babel-preset-react-app/webpack-overrides"
                                 ),
+                                presets: [
+                                    "babel-preset-react-app"
+                                ],
                                 plugins: [
                                     [
                                         require.resolve(
@@ -250,6 +210,7 @@ module.exports = function (webpackEnv) {
                                         ),
                                         {
                                             loaderMap: [],
+                                            runtime: "automatic"
                                         },
                                     ],
                                 ],
@@ -330,7 +291,6 @@ module.exports = function (webpackEnv) {
                 new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [
                     /runtime-.+[.]js/,
                 ]),
-            new InterpolateHtmlPlugin(HtmlWebpackPlugin, env.raw),
             new ModuleNotFoundPlugin(paths.appPath),
             new webpack.DefinePlugin(env.stringified),
             isEnvDevelopment && new webpack.HotModuleReplacementPlugin(),
@@ -343,27 +303,7 @@ module.exports = function (webpackEnv) {
                     chunkFilename:
                         "static/css/[name].[contenthash:8].chunk.css",
                 }),
-            new ManifestPlugin({
-                fileName: "asset-manifest.json",
-                publicPath: paths.publicUrlOrPath,
-                generate: (seed, files, entrypoints) => {
-                    const manifestFiles = files.reduce((manifest, file) => {
-                        manifest[file.name] = file.path
-                        return manifest
-                    }, seed)
-                    const entrypointFiles = entrypoints.main.filter(
-                        (fileName) => !fileName.endsWith(".map")
-                    )
-
-                    return {
-                        files: manifestFiles,
-                        entrypoints: entrypointFiles,
-                    }
-                },
-            }),
         ].filter(Boolean),
-        // Some libraries import Node modules but don't use them in the browser.
-        // Tell webpack to provide empty mocks for them so importing them works.
         node: {
             module: "empty",
             dgram: "empty",
