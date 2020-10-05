@@ -200,9 +200,7 @@ module.exports = function (webpackEnv) {
                                 customize: require.resolve(
                                     "babel-preset-react-app/webpack-overrides"
                                 ),
-                                presets: [
-                                    "babel-preset-react-app"
-                                ],
+                                presets: ["babel-preset-react-app"],
                                 plugins: [
                                     [
                                         require.resolve(
@@ -210,7 +208,7 @@ module.exports = function (webpackEnv) {
                                         ),
                                         {
                                             loaderMap: [],
-                                            runtime: "automatic"
+                                            runtime: "automatic",
                                         },
                                     ],
                                 ],
