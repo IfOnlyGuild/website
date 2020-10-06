@@ -1,44 +1,32 @@
 import React from "react"
-import banner from "./banner.png" // banner
-
-//Main title commented below
-//<Typography variant="h2">The IfOnly Guild</Typography>
-/* {
-                  <Centered>
-                  <div>
-                  <img src={icon} width="200" height="200" alt="IfOnly Banner" />
-                  </div>
-                  </Centered>
-                  }
-                  <Divider style={{ margin: 20 }} /> */
-
+import banner from "./banner.png"
 import {
     AppBar,
     Toolbar,
     Typography,
     Grid,
     Button,
-    Divider,
     FormControlLabel,
     Switch,
     Paper,
 } from "@material-ui/core"
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles"
+import { ThemeProvider } from "@material-ui/core/styles"
 import { Chat } from "@material-ui/icons"
+import Centered from "./Centered"
+import { mainPalette, darkPalette, useStyles } from "./styling"
 
-const darkPalette = createMuiTheme({
-    palette: {
-        type: "dark",
-    },
-})
-
-const navbarItems = (darkTheme, setDarkTheme) => [
-    <a href="https://discord.gg/DmAqWfQ" className="navlink">
-        <Button color="inherit" startIcon={<Chat />}>
-            Discord
-        </Button>
-    </a>,
+/**
+ * The items that appear on the navigation bar.
+ * This is a factory so that the dark theme variable and its setter can be used
+ * outside the scope of the hook.
+ *
+ * @param {boolean} darkTheme If the dark theme is enabled.
+ * @param {(darkTheme: boolean) => void} setDarkTheme A setter for the dark theme variable value.
+ * @param {any} classes The styles object.
+ */
+const navbarItems = (darkTheme, setDarkTheme, classes) => [
     <FormControlLabel
+        key="darkThemeSwitch"
         control={
             <Switch
                 checked={darkTheme}
@@ -48,32 +36,39 @@ const navbarItems = (darkTheme, setDarkTheme) => [
         }
         label="Dark Theme"
     />,
+    <a
+        href="https://discord.gg/DmAqWfQ"
+        className={classes.navLink}
+        key="discord"
+    >
+        <Button color="inherit" variant="outlined" startIcon={<Chat />}>
+            Discord
+        </Button>
+    </a>,
 ]
 
+/**
+ * The component itself.
+ */
 export default () => {
+    const classes = useStyles()
     const [darkTheme, setDarkTheme] = React.useState(false)
-
-    const Centered = (props) => (
-        <Grid container justify="center">
-            {props.children}
-        </Grid>
-    )
 
     const component = (
         <>
-            <nav style={{ flexGrow: 1 }}>
-                <AppBar position="static">
-                    <Toolbar>
-                        <Typography style={{ flexGrow: 1 }} variant="h6">
+            <nav>
+                <AppBar position="static" className={classes.flex}>
+                    <Toolbar className={classes.nav}>
+                        <Typography className={classes.flex} variant="h6">
                             The IfOnly Guild
                         </Typography>
-                        {navbarItems(darkTheme, setDarkTheme)}
+                        {navbarItems(darkTheme, setDarkTheme, classes)}
                     </Toolbar>
                 </AppBar>
             </nav>
             <main>
-                <Paper style={{ borderRadius: "0px", padding: "15px" }}>
-                    <Grid container>
+                <Paper className={classes.mainPaper}>
+                    <Grid container className={classes.divider}>
                         <Centered>
                             {
                                 <div>
@@ -92,15 +87,14 @@ export default () => {
                             </Typography>
                         </Centered>
                     </Grid>
-                    <Divider style={{ margin: 5 }} />
-                    <Grid container>
+                    <Grid container className={classes.divider}>
                         <Centered>
-                            <Typography variant="h5">About</Typography>
+                            <Typography variant="h4">About</Typography>
                         </Centered>
                         <Centered>
                             <Typography
                                 variant="body1"
-                                style={{ textAlign: "center" }}
+                                className={classes.center}
                             >
                                 IfOnly is a Hypixel guild founded back in early
                                 2018. It grew quite big over time and eventually
@@ -115,12 +109,9 @@ export default () => {
                             </Typography>
                         </Centered>
                     </Grid>
-                    <Divider style={{ margin: 5 }} />
-                    <Grid container>
+                    <Grid container className={classes.divider}>
                         <Centered>
-                            <Typography variant="h5" style={{ marginTop: 20 }}>
-                                Benefits
-                            </Typography>
+                            <Typography variant="h4">Benefits</Typography>
                         </Centered>
                         <Centered>
                             <Typography
@@ -128,20 +119,37 @@ export default () => {
                                 style={{ textAlign: "center" }}
                             >
                                 Our guild has a lot of things to offer to our
-                                members, including weekly game nights, an SMP
-                                server, the [I] tag on Hypixel, and lots of
-                                friendly faces to play and chat with!
+                                members, including weekly game nights, a private
+                                modded survival server (a customly modified
+                                version of Enigmatica 2), the [I] tag on
+                                Hypixel, and lots of friendly faces to play and
+                                chat with!
                             </Typography>
                         </Centered>
                     </Grid>
-                    <Divider style={{ margin: 5 }} />
-                    <Grid container>
+                    <Grid container className={classes.divider}>
                         <Centered>
-                            <Typography variant="h5" style={{ marginTop: 20 }}>
-                                Join Us
+                            <Typography variant="h4">Requirements</Typography>
+                        </Centered>
+                        <Centered>
+                            <Typography
+                                variant="body1"
+                                className={classes.center}
+                            >
+                                We require that you get at least 50,000 guild XP
+                                per week and remain active in the guild and
+                                Discord server. If you are not able to complete
+                                this during certain weeks (e.g. you are on
+                                vacation), you are excused. Otherwise, you do
+                                need to meet the requirement or you will get
+                                kicked.
                             </Typography>
                         </Centered>
-                        <Divider style={{ margin: 5 }} />
+                    </Grid>
+                    <Grid container className={classes.divider}>
+                        <Centered>
+                            <Typography variant="h4">Join Us</Typography>
+                        </Centered>
                         <Centered>
                             <Typography
                                 variant="body1"
@@ -153,7 +161,6 @@ export default () => {
                             </Typography>
                         </Centered>
                     </Grid>
-                    <Divider style={{ margin: 5 }} />
                 </Paper>
             </main>
         </>
@@ -163,5 +170,5 @@ export default () => {
         return <ThemeProvider theme={darkPalette}>{component}</ThemeProvider>
     }
 
-    return component
+    return <ThemeProvider theme={mainPalette}>{component}</ThemeProvider>
 }
