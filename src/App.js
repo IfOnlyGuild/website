@@ -1,5 +1,4 @@
 import React from "react"
-import banner from "./banner.png"
 import {
     AppBar,
     Toolbar,
@@ -12,6 +11,7 @@ import {
 } from "@material-ui/core"
 import { ThemeProvider } from "@material-ui/core/styles"
 import { Chat } from "@material-ui/icons"
+import Image, { Shimmer } from 'react-shimmer'
 import Centered from "./Centered"
 import { mainPalette, darkPalette, useStyles } from "./styling"
 
@@ -72,11 +72,9 @@ export default () => {
                         <Centered>
                             {
                                 <div>
-                                    <img
-                                        src={banner}
-                                        width="719.875"
-                                        height="191.875"
-                                        alt="IfOnly Banner"
+                                    <Image
+                                        src="/banner.png"
+                                        fallback={<Shimmer width={800} height={600} />}
                                     />
                                 </div>
                             }
