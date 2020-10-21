@@ -31,8 +31,6 @@
         "react-dev-utils": "^10.2.1",
         "react-dom": "^16.14.0",
         "react-shimmer": "^3.1.1",
-        "react-waypoint": "^9.0.3",
-        "sharp": "^0.26.2",
         "style-loader": "^2.0.0",
         "terser-webpack-plugin": "^4.2.2",
         "url-loader": "^4.1.1",
